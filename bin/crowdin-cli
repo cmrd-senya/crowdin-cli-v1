@@ -1090,7 +1090,7 @@ pre do |globals, command, options, args|
   begin
     # undocumented feature
     # you can use ERB in your config file, e.g.
-    # api_key: <%= # ruby code ... %>
+    # api_token: <%= # ruby code ... %>
     #
     @config = YAML.load(ERB.new(File.read(globals[:config])).result) || {}
   rescue Psych::SyntaxError => err
@@ -1108,7 +1108,7 @@ pre do |globals, command, options, args|
   # api_key_env: 'CROWDIN_API_KEY'
   # base_path_env: 'CROWDIN_BASE_PATH'
   #
-  ['api_key', 'project_identifier', 'base_path'].each do |key|
+  ['api_token', 'project_identifier', 'base_path'].each do |key|
     if @config["#{key}_env"]
       unless @config[key] # project credentials have a higher priority if they are specified in the config
         @config[key] = ENV[@config["#{key}_env"]]
@@ -1120,12 +1120,12 @@ pre do |globals, command, options, args|
   #
   if File.exist?(globals[:identity])
     identity = YAML.load(ERB.new(File.read(globals[:identity])).result) || {}
-    ['api_key', 'project_identifier', 'base_path'].each do |key|
+    ['api_token', 'project_identifier', 'base_path'].each do |key|
       @config[key] = identity[key] if identity[key]
     end
   end
 
-  ['api_key', 'project_identifier'].each do |key|
+  ['api_token', 'project_identifier'].each do |key|
     unless @config[key]
       exit_now! <<~HEREDOC
         Configuration file misses required option `#{key}`
@@ -1240,7 +1240,7 @@ pre do |globals, command, options, args|
   Crowdin::API.log = Logger.new($stderr) if globals[:verbose]
 
   base_url = @config['base_url'] || 'https://api.crowdin.com'
-  @crowdin = Crowdin::API.new(api_key: @config['api_key'], project_id: @config['project_identifier'], base_url: base_url)
+  @crowdin = Crowdin::API.new(api_key: @config['api_token'], project_id: @config['project_identifier'], base_url: base_url)
 
   begin
     @project_info = @crowdin.project_info
